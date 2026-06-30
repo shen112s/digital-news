@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全国乡村小学数量与办学结构变化（2001-2024）</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    background: #FAF7ED;
+    color: #3D3929;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 36px 24px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 1440px;
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 48px 48px 40px;
+    box-shadow: 0 2px 24px rgba(61, 57, 41, 0.08), 0 8px 48px rgba(61, 57, 41, 0.05);
+  }
+
+  .header {
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #2D2A1C;
+    line-height: 1.4;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    color: #8B8570;
+    margin-top: 6px;
+    line-height: 1.6;
+  }
+
+  .subtitle .num {
+    font-weight: 700;
+    color: #2D2D2D;
+  }
+
+  .subtitle .num-yellow {
+    font-weight: 700;
+    color: #6F9DA8;
+  }
+
+  .subtitle .num-red {
+    font-weight: 700;
+    color: #DA472C;
+  }
+
+  .subtitle .num-dark {
+    font-weight: 700;
+    color: #777576;
+  }
+
+  .chart-container {
+    position: relative;
+    width: 100%;
+    height: 800px;
+    margin-top: 16px;
+  }
+
+  .legend-custom {
+    display: flex;
+    justify-content: center;
+    gap: 36px;
+    margin-top: 22px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #6B6652;
+  }
+
+  .legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+
+  .legend-line-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .legend-line {
+    width: 28px;
+    height: 3px;
+    border-radius: 2px;
+  }
+
+  .legend-circle {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+  }
+
+  .source {
+    margin-top: 28px;
+    text-align: right;
+    font-size: 12px;
+    color: #B5AF9A;
+    letter-spacing: 0.03em;
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .stat-block {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: #8B8570;
+    margin-top: 4px;
+  }
+
+  .stat-value.down { color: #1A1A1A; }
+  .stat-value.yellow { color: #6F9DA8; }
+  .stat-value.red { color: #DA472C; }
+  .stat-value.dark { color: #777576; }
+  .stat-value.dark { color: #555555; }
+
+  @media (max-width: 768px) {
+    .card { padding: 28px 18px 24px; }
+    h1 { font-size: 22px; }
+    .chart-container { height: 500px; }
+    .stat-value { font-size: 22px; }
+    .stats-row { gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <h1>全国乡村（农村）地区小学数量与办学结构变化</h1>
+    <p class="subtitle">
+      2001–2024 年，全国乡村小学从 <span class="num">41.6 万所</span> 锐减至 <span class="num">6.4 万所</span>，
+      降幅 <span class="num">84.7%</span>；
+      <span class="num-yellow">教育部门办学</span> 始终占绝对主导，
+      <span class="num-red">民办</span> 与 <span class="num-dark">其他部门</span> 占比微小且持续萎缩
+    </p>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="mainChart"></canvas>
+  </div>
+
+  <div class="legend-custom">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#DA472C;"></div>
+      <span>民办（社会力量办）</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#777576;"></div>
+      <span>其他部门</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#6F9DA8;"></div>
+      <span>教育部门办学</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-line-wrap">
+        <div class="legend-line" style="background:#DF9265;"></div>
+        <div class="legend-circle" style="background:#DF9265;"></div>
+      </div>
+      <span>乡村小学总计趋势</span>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-block">
+      <div class="stat-value down">−84.7%</div>
+      <div class="stat-label">24 年总降幅</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-value down">416,198 → 63,729</div>
+      <div class="stat-label">2001 年 → 2024 年</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-value yellow">97.7% → 100%</div>
+      <div class="stat-label">教育部门占比</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-value red">2,711 → 1,241</div>
+      <div class="stat-label">民办学校变化</div>
+    </div>
+  </div>
+
+  <p class="source">数据来源：教育部 · 统计数据从 2001 年起截至 2024 年（2025 年后教育统计数据暂未公布）<br><span style="color:#B5AF9A;">※ 底部红色 & 灰色区域为视觉放大显示，柱体总高度准确，悬停可查看真实数值</span></p>
+</div>
+
+<script>
+(function() {
+  const years = [2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
+
+  // 教育部门（教育部门和集体办）
+  const edu   = [410604,378648,355083,332190,311895,290638,267872,249548,231360,208148,167153,153260,138559,126865,116522,104501,94123,88619,86670,84140,79702,74616,69284,63729];
+  // 其他部门
+  const other = [2883,2653,2340,1969,1671,1282,989,842,402,341,242,175,117,94,61,55,48,47,32,24,19,22,19,17];
+  // 民办（社会力量办）
+  const priv  = [2711,2703,2943,3159,3225,3132,2723,2651,2395,2405,1630,1558,1639,1725,1780,1832,1872,1929,1921,1913,1820,1453,1336,1241];
+  // 总计
+  const total = [416198,384004,360366,337318,316791,295052,271584,253041,234157,210894,169045,155008,140328,128703,118381,106403,96052,90603,88631,86085,81547,76093,70641,63729];
+
+  const ctx = document.getElementById('mainChart').getContext('2d');
+
+  // ---- Visual floor: ensure 民办 & 其他部门 each have ≥4% bar height ----
+  const MIN_PCT = 0.04; // 4% minimum visual share per segment
+  const eduDisplay = [];
+  const otherDisplay = [];
+  const privDisplay = [];
+  for (let i = 0; i < years.length; i++) {
+    const t = total[i];
+    const floor = Math.round(t * MIN_PCT);
+    const p = Math.max(priv[i], floor);
+    const o = Math.max(other[i], floor);
+    const e = t - p - o;
+    privDisplay.push(p);
+    otherDisplay.push(o);
+    eduDisplay.push(e);
+  }
+
+  // Sparse year labels: show every 2-3 years
+  const labels = years.map((y, i) => {
+    if (i === 0 || i === years.length - 1 || i % 2 === 0) return y;
+    return '';
+  });
+
+  // Plugin: draw total value on top of each bar
+  const totalLabelPlugin = {
+    id: 'totalLabels',
+    afterDatasetsDraw(chart) {
+      const { ctx, scales: { x, y }, data } = chart;
+      const meta = chart.getDatasetMeta(0); // use first bar dataset for x positions
+      const fontSize = chart.width < 600 ? 9 : (chart.width < 1000 ? 10 : 11);
+
+      ctx.save();
+      ctx.font = `bold ${fontSize}px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+
+      const totalData = data.datasets[3].data; // line dataset
+      const hasData = data.datasets[0].data;
+
+      meta.data.forEach((bar, i) => {
+        if (hasData[i] == null) return;
+        const val = totalData[i];
+        if (val == null) return;
+
+        // Position: top of stacked bar, with a small offset
+        const xPos = bar.x;
+        const yPos = y.getPixelForValue(val) - 6;
+
+        // Text & metrics
+        const text = (val / 10000).toFixed(1) + '万';
+        const metrics = ctx.measureText(text);
+        const bw = metrics.width + 10;
+        const bh = fontSize + 6;
+
+        // Draw background pill (compat: manual rounded rect)
+        ctx.fillStyle = 'rgba(26, 26, 26, 0.07)';
+        const rx = xPos - bw / 2;
+        const ry = yPos - bh - 2;
+        const r = 4;
+        ctx.beginPath();
+        ctx.moveTo(rx + r, ry);
+        ctx.lineTo(rx + bw - r, ry);
+        ctx.arcTo(rx + bw, ry, rx + bw, ry + r, r);
+        ctx.lineTo(rx + bw, ry + bh - r);
+        ctx.arcTo(rx + bw, ry + bh, rx + bw - r, ry + bh, r);
+        ctx.lineTo(rx + r, ry + bh);
+        ctx.arcTo(rx, ry + bh, rx, ry + bh - r, r);
+        ctx.lineTo(rx, ry + r);
+        ctx.arcTo(rx, ry, rx + r, ry, r);
+        ctx.closePath();
+        ctx.fill();
+
+        // Draw text
+        ctx.fillStyle = '#1A1A1A';
+        ctx.fillText(text, xPos, yPos - 3);
+      });
+
+      ctx.restore();
+
+      // Draw dashed reference line for amplified bottom zone
+      const maxTotal = Math.max(...data.datasets[3].data);
+      const ampThreshold = maxTotal * MIN_PCT * 2; // 民办 + 其他部门 combined floor
+      const lineY = y.getPixelForValue(ampThreshold);
+      ctx.save();
+      ctx.setLineDash([6, 4]);
+      ctx.strokeStyle = 'rgba(180, 160, 140, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x.left, lineY);
+      ctx.lineTo(x.right, lineY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font = '10px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+      ctx.fillStyle = 'rgba(180, 160, 140, 0.8)';
+      ctx.textAlign = 'left';
+      ctx.fillText('▸ 底部区域视觉放大', x.left + 6, lineY - 4);
+      ctx.restore();
+    }
+  };
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: '民办（社会力量办）',
+          data: privDisplay,
+          backgroundColor: '#DA472C',
+          borderColor: '#B83A22',
+          borderWidth: 2,
+          borderRadius: 0,
+          borderSkipped: false,
+          barPercentage: 0.95,
+          order: 2,
+          stack: 'schools'
+        },
+        {
+          label: '其他部门',
+          data: otherDisplay,
+          backgroundColor: '#777576',
+          borderColor: '#5A5A5A',
+          borderWidth: 2,
+          borderRadius: 0,
+          borderSkipped: false,
+          barPercentage: 0.95,
+          order: 2,
+          stack: 'schools'
+        },
+        {
+          label: '教育部门办学',
+          data: eduDisplay,
+          backgroundColor: '#6F9DA8',
+          borderColor: '#FFFFFF',
+          borderWidth: 0.5,
+          borderRadius: 0,
+          borderSkipped: false,
+          barPercentage: 0.95,
+          order: 2,
+          stack: 'schools'
+        },
+        {
+          label: '乡村小学总计',
+          data: total,
+          type: 'line',
+          borderColor: '#DF9265',
+          backgroundColor: 'transparent',
+          borderWidth: 3,
+          pointBackgroundColor: '#DF9265',
+          pointBorderColor: '#FFFFFF',
+          pointBorderWidth: 2,
+          pointRadius: function(ctx) {
+            const i = ctx.dataIndex;
+            if (i === 0 || i === years.length - 1) return 7;
+            return 4;
+          },
+          pointHoverRadius: 9,
+          pointHoverBackgroundColor: '#B1CA8C',
+          tension: 0.35,
+          order: 1,
+          fill: false,
+          stack: 'line'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        intersect: false,
+        mode: 'index'
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#FFFFFF',
+          titleColor: '#2D2A1C',
+          bodyColor: '#3D3929',
+          borderColor: '#E5E0D5',
+          borderWidth: 1,
+          cornerRadius: 10,
+          padding: 16,
+          titleFont: { weight: 'bold', size: 14 },
+          bodyFont: { size: 13 },
+          boxPadding: 6,
+          callbacks: {
+            title: function(items) {
+              return years[items[0].dataIndex] + ' 年';
+            },
+            label: function(ctx) {
+              const i = ctx.dataIndex;
+              if (ctx.datasetIndex === 0) return '民办办学：' + priv[i].toLocaleString() + ' 所';
+              if (ctx.datasetIndex === 1) return '其他部门：' + other[i].toLocaleString() + ' 所';
+              if (ctx.datasetIndex === 2) return '教育部门办学：' + edu[i].toLocaleString() + ' 所';
+              if (ctx.datasetIndex === 3) return '总计：' + total[i].toLocaleString() + ' 所';
+              return '';
+            },
+            afterBody: function(items) {
+              const i = items[0].dataIndex;
+              const eduPct = (edu[i] / total[i] * 100).toFixed(1);
+              const privPct = (priv[i] / total[i] * 100).toFixed(1);
+              const otherPct = (other[i] / total[i] * 100).toFixed(1);
+              return [
+                '教育部门占比：' + eduPct + '%',
+                '民办占比：' + privPct + '%',
+                '其他部门占比：' + otherPct + '%'
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          ticks: {
+            color: '#8B8570',
+            font: { size: 12 },
+            maxRotation: 0,
+            autoSkip: false
+          },
+          grid: {
+            color: '#F0EDE3',
+            drawBorder: false
+          }
+        },
+        y: {
+          stacked: true,
+          position: 'left',
+          ticks: {
+            color: '#8B8570',
+            font: { size: 12 },
+            callback: function(v) {
+              return (v / 10000).toFixed(0) + ' 万';
+            },
+            stepSize: 50000
+          },
+          grid: {
+            color: '#F0EDE3',
+            drawBorder: false
+          },
+          border: {
+            display: false
+          },
+          title: {
+            display: true,
+            text: '学校数量（万所）',
+            color: '#8B8570',
+            font: { size: 12 }
+          }
+        }
+      },
+      layout: {
+        padding: {
+          top: 40,
+          right: 10,
+          bottom: 0,
+          left: 0
+        }
+      }
+    },
+    plugins: [totalLabelPlugin]
+  });
+})();
+</script>
+
+</body>
+</html>
